@@ -1,0 +1,10 @@
+docker run --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=myPassword -it -p 5432:5432 postgres:alpine
+
+docker exec -it postgresql bash
+
+psql -U postgres
+
+psql -U postgres -d namedb
+
+
+docker run -d -p 27017:27017 --name mongodb mongo
