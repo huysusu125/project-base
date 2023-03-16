@@ -1,14 +1,24 @@
 package com.huytd.basecacheredis.entity;
 
+import com.huytd.basecacheredis.constant.RoleTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "user", schema = "public")
+@Table(name = "\"user\"", schema = "public")
+@Getter
+@Setter
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor
 public class User extends BaseEntity {
 
-    @Column(name = "name")
+    @Column(name = "username")
     private String username;
 
     @Column(name = "email")
@@ -18,6 +28,7 @@ public class User extends BaseEntity {
     private String password;
 
     @Column(name = "role_type")
-    private Integer roleType;
+    @Builder.Default
+    private Integer roleType = RoleTypeEnum.END_USER.getCode();
 
 }
