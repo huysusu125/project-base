@@ -9,6 +9,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 
@@ -23,21 +24,23 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(host, port);
+		/*
+		In case of using Lettuce, do not validate connection when to connect to pool.
+		 Otherwise it will connect to pool first and then to cluster nodes one by one,
+		 then fetches the real data. Or sometimes you will see the following Exception case:
+				Redis exception; nested exception is io.lettuce.core.RedisException: Connection is closed
+		* */
+        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(host, port);
+        connectionFactory.setValidateConnection(false);
+        return connectionFactory;
     }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory());
-        template.setKeySerializer(new StringRedisSerializer());
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.deactivateDefaultTyping();
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
-        template.setValueSerializer(serializer);
-
-        return template;
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
+        return redisTemplate;
     }
 
 }

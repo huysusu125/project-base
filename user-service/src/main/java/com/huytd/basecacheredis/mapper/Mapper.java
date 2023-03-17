@@ -1,5 +1,6 @@
 package com.huytd.basecacheredis.mapper;
 
 
-public interface Mapper {
+public interface Mapper<T, S> {
+     T toDto(S entity);
 }

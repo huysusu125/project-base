@@ -3,8 +3,10 @@ package com.huytd.basecacheredis.service.impl;
 import com.huytd.basecacheredis.constant.ErrorCodes;
 import com.huytd.basecacheredis.dto.BaseResponse;
 import com.huytd.basecacheredis.dto.RegisterRequest;
+import com.huytd.basecacheredis.dto.UserProfileResponse;
 import com.huytd.basecacheredis.entity.User;
 import com.huytd.basecacheredis.exception.UserRegistrationException;
+import com.huytd.basecacheredis.mapper.Mapper;
 import com.huytd.basecacheredis.repository.UserRepository;
 import com.huytd.basecacheredis.service.UserService;
 import com.huytd.basecacheredis.utils.ServletUtils;
@@ -26,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserCacheUtils userCacheUtils;
-
+    private final Mapper<UserProfileResponse, User> userMapper;
     @Override
     public BaseResponse<?> register(RegisterRequest registerRequest) {
         User user = userRepository.findByUsername(registerRequest.getEmail());
@@ -43,17 +45,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BaseResponse<?> getUserInfo() {
-        BaseResponse baseResponse = new BaseResponse();
+    public BaseResponse<UserProfileResponse> getUserInfo() {
+        BaseResponse<UserProfileResponse> baseResponse = new BaseResponse<>();
         Long userId = ServletUtils.getCurrentUserId();
         if (userId == null) {
             return baseResponse;
         }
         User user = userCacheUtils.getUserFromCache(userId);
         if (user == null) {
-            user = userRepository.findById(userId).orElse(null);
+            user = userRepository
+                    .findById(userId).orElse(null);
+            if (user != null) {
+                userCacheUtils.saveUserToCache(user);
+            }
+
         }
-        baseResponse.setData(user);
+        baseResponse.setData(userMapper.toDto(user));
         return baseResponse;
     }
 }

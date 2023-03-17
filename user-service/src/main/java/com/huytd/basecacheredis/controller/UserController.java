@@ -2,6 +2,7 @@ package com.huytd.basecacheredis.controller;
 
 import com.huytd.basecacheredis.dto.BaseResponse;
 import com.huytd.basecacheredis.dto.RegisterRequest;
+import com.huytd.basecacheredis.dto.UserProfileResponse;
 import com.huytd.basecacheredis.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class UserController {
     }
 
     @GetMapping()
-    public BaseResponse<?> getUserInfo( ) {
+    public BaseResponse<UserProfileResponse> getUserInfo( ) {
         return userService.getUserInfo();
     }
 }

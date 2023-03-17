@@ -28,6 +28,6 @@ spring:
       port: 6379
 
 redis:
-  time-cache-millisecond: 300000
+  time-cache-seconds: 300
   prefix-user: user
 

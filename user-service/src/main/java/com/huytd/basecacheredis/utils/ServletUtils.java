@@ -8,7 +8,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Enumeration;
 
 public class ServletUtils {
-    private static final String USER_ID = "DFY-UID";
+    private static final String USER_ID = "user_id";
     private static final String BEARER_PREFIX = "Bearer ";
     public static HttpServletRequest getCurrentRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
