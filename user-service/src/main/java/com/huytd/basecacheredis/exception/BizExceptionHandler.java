@@ -17,9 +17,17 @@ import java.util.List;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class BizExceptionHandler {
+
     @ExceptionHandler(UserRegistrationException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorRequestResponse handlerUserRegistrationException(UserRegistrationException ex,
+                                                                 HttpServletRequest request) {
+        return buildRequestResponse(ex.getErrCodes(), request.getRequestURL().toString());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorRequestResponse handlerBadRequestException(BadRequestException ex,
                                                                  HttpServletRequest request) {
         return buildRequestResponse(ex.getErrCodes(), request.getRequestURL().toString());
     }
@@ -31,7 +39,6 @@ public class BizExceptionHandler {
         response.setUrl(requestUrl);
         return response;
     }
-
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)

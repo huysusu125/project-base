@@ -2,9 +2,12 @@ package com.huytd.basecacheredis.service.impl;
 
 import com.huytd.basecacheredis.constant.ErrorCodes;
 import com.huytd.basecacheredis.dto.BaseResponse;
+import com.huytd.basecacheredis.dto.LoginRequest;
+import com.huytd.basecacheredis.dto.Oauth2AccessToken;
 import com.huytd.basecacheredis.dto.RegisterRequest;
 import com.huytd.basecacheredis.dto.UserProfileResponse;
 import com.huytd.basecacheredis.entity.User;
+import com.huytd.basecacheredis.exception.BadRequestException;
 import com.huytd.basecacheredis.exception.UserRegistrationException;
 import com.huytd.basecacheredis.mapper.Mapper;
 import com.huytd.basecacheredis.repository.UserRepository;
@@ -30,8 +33,9 @@ public class UserServiceImpl implements UserService {
     private final UserCacheUtils userCacheUtils;
     private final Mapper<UserProfileResponse, User> userMapper;
     @Override
-    public BaseResponse<?> register(RegisterRequest registerRequest) {
-        User user = userRepository.findByUsername(registerRequest.getEmail());
+    public BaseResponse<Long> register(RegisterRequest registerRequest) {
+        BaseResponse<Long> response = new BaseResponse<>();
+        User user = userRepository.findByUsername(registerRequest.getEmail()).orElse(null);
         if (user != null) {
             throw new UserRegistrationException(Collections.singletonList(ErrorCodes.USER_ALREADY_EXISTED));
         }
@@ -41,7 +45,8 @@ public class UserServiceImpl implements UserService {
                 .username(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .build());
-        return BaseResponse.builder().data(user.getId()).build();
+        response.setData(user.getId());
+        return response;
     }
 
     @Override
@@ -62,5 +67,15 @@ public class UserServiceImpl implements UserService {
         }
         baseResponse.setData(userMapper.toDto(user));
         return baseResponse;
+    }
+
+    @Override
+    public BaseResponse<Oauth2AccessToken> loginByEmail(LoginRequest loginRequest) {
+        User user = userRepository
+                .findByUsername(loginRequest.getEmail())
+                .orElseThrow(() -> new BadRequestException(Collections.singletonList(ErrorCodes.USER_NOT_FOUND)));
+
+
+        return null;
     }
 }
