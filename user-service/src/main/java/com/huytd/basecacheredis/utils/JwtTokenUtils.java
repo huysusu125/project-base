@@ -1,5 +1,8 @@
 package com.huytd.basecacheredis.utils;
 
+import com.huytd.basecacheredis.constant.TokenField;
+import com.huytd.basecacheredis.dto.Oauth2AccessToken;
+import com.huytd.basecacheredis.entity.User;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -9,6 +12,7 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import jakarta.annotation.PostConstruct;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -36,26 +40,23 @@ public class JwtTokenUtils {
         keyPair = keyPairGenerator.generateKeyPair();
     }
 
-    public String generateToken(String username) throws JOSEException {
+    public String generateAccessToken(User user) throws JOSEException {
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + tokenExpiration * 1000);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .expirationTime(expirationDate)
+                .claim("user_id", user.getId())
+                .claim("email", user.getEmail())
+                .claim("token_type", "access_token")
+                .claim("role", "")
                 .build();
 
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256).build();
-        Payload payload = new Payload(claimsSet.toJSONObject());
-        JWSObject jwsObject = new JWSObject(header, payload);
-
-        RSASSASigner signer = new RSASSASigner(keyPair.getPrivate());
-        jwsObject.sign(signer);
-
-        return jwsObject.serialize();
+        return signTokenRS256(claimsSet);
     }
 
-    public String getUsernameFromToken(String token) throws JOSEException, ParseException {
+    public Long getUserIdFromToken(String token) throws JOSEException, ParseException {
         JWSObject jwsObject = JWSObject.parse(token);
         RSASSAVerifier verifier = new RSASSAVerifier((RSAPublicKey) keyPair.getPublic());
         if (!jwsObject.verify(verifier)) {
@@ -68,10 +69,43 @@ public class JwtTokenUtils {
             throw new JOSEException("Token is expired");
         }
 
-        return claimsSet.getSubject();
+        return (Long) claimsSet.getClaim(TokenField.USER_ID);
     }
 
     public String getPublicKey() {
         return Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+    }
+
+    @SneakyThrows
+    public Oauth2AccessToken generateOauth2AccessToken(User user) {
+        return Oauth2AccessToken
+                .builder()
+                .accessToken(generateAccessToken(user))
+                .refreshToken(generateRefreshToken(user))
+                .build();
+    }
+
+    private String generateRefreshToken(User user) throws JOSEException {
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + tokenExpiration * 1000);
+
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getUsername())
+                .expirationTime(expirationDate)
+                .claim("user_id", user.getId())
+                .claim("email", user.getEmail())
+                .claim("token_type", "refresh_token")
+                .build();
+
+        return signTokenRS256(claimsSet);
+    }
+
+    private String signTokenRS256(JWTClaimsSet claimsSet) throws JOSEException {
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256).build();
+        Payload payload = new Payload(claimsSet.toJSONObject());
+        JWSObject jwsObject = new JWSObject(header, payload);
+        RSASSASigner signer = new RSASSASigner(keyPair.getPrivate());
+        jwsObject.sign(signer);
+        return jwsObject.serialize();
     }
 }

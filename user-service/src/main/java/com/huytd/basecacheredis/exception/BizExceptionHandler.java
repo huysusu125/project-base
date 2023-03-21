@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,8 +29,15 @@ public class BizExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorRequestResponse handlerBadRequestException(BadRequestException ex,
-                                                                 HttpServletRequest request) {
+                                                           HttpServletRequest request) {
         return buildRequestResponse(ex.getErrCodes(), request.getRequestURL().toString());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorRequestResponse handlerHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex,
+                                                                              HttpServletRequest request) {
+        return buildRequestResponse(Collections.singletonList(ex.getMessage()), request.getRequestURL().toString());
     }
 
     private ErrorRequestResponse buildRequestResponse(List<String> errCodes, String requestUrl) {
@@ -43,7 +51,7 @@ public class BizExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorRequestResponse handlerConstraintViolationException(MethodArgumentNotValidException ex,
-                                                                 HttpServletRequest request) {
+                                                                    HttpServletRequest request) {
         return buildRequestResponse(Collections.singletonList(ex.getLocalizedMessage()), request.getRequestURL().toString());
     }
 

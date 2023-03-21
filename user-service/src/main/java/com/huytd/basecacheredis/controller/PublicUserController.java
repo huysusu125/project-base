@@ -28,8 +28,4 @@ public class PublicUserController {
         return userService.register(registerRequest);
     }
 
-    @PostMapping("/oauth/token")
-    public BaseResponse<Oauth2AccessToken> loginByEmail(@RequestBody LoginRequest loginRequest) {
-        return userService.loginByEmail(loginRequest);
-    }
 }

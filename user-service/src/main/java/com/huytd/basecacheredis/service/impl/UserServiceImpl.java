@@ -4,6 +4,7 @@ import com.huytd.basecacheredis.constant.ErrorCodes;
 import com.huytd.basecacheredis.dto.BaseResponse;
 import com.huytd.basecacheredis.dto.LoginRequest;
 import com.huytd.basecacheredis.dto.Oauth2AccessToken;
+import com.huytd.basecacheredis.dto.RefreshTokenRequest;
 import com.huytd.basecacheredis.dto.RegisterRequest;
 import com.huytd.basecacheredis.dto.UserProfileResponse;
 import com.huytd.basecacheredis.entity.User;
@@ -12,9 +13,11 @@ import com.huytd.basecacheredis.exception.UserRegistrationException;
 import com.huytd.basecacheredis.mapper.Mapper;
 import com.huytd.basecacheredis.repository.UserRepository;
 import com.huytd.basecacheredis.service.UserService;
+import com.huytd.basecacheredis.utils.JwtTokenUtils;
 import com.huytd.basecacheredis.utils.ServletUtils;
 import com.huytd.basecacheredis.utils.UserCacheUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,7 +30,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-
+    private final JwtTokenUtils jwtTokenUtils;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserCacheUtils userCacheUtils;
@@ -49,10 +52,12 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @SneakyThrows
     @Override
     public BaseResponse<UserProfileResponse> getUserInfo() {
         BaseResponse<UserProfileResponse> baseResponse = new BaseResponse<>();
-        Long userId = ServletUtils.getCurrentUserId();
+        String token = ServletUtils.getBearerToken();
+        Long userId = jwtTokenUtils.getUserIdFromToken(token);
         if (userId == null) {
             return baseResponse;
         }
@@ -63,7 +68,6 @@ public class UserServiceImpl implements UserService {
             if (user != null) {
                 userCacheUtils.saveUserToCache(user);
             }
-
         }
         baseResponse.setData(userMapper.toDto(user));
         return baseResponse;
@@ -75,7 +79,19 @@ public class UserServiceImpl implements UserService {
                 .findByUsername(loginRequest.getEmail())
                 .orElseThrow(() -> new BadRequestException(Collections.singletonList(ErrorCodes.USER_NOT_FOUND)));
 
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new BadRequestException(Collections.singletonList(ErrorCodes.INVALID_PASSWORD));
+        }
 
+        BaseResponse<Oauth2AccessToken> response = new BaseResponse<>();
+
+        response.setData(jwtTokenUtils.generateOauth2AccessToken(user));
+
+        return response;
+    }
+
+    @Override
+    public BaseResponse<Oauth2AccessToken> refreshToken(RefreshTokenRequest refreshTokenRequest) {
         return null;
     }
 }
