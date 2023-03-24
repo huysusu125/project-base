@@ -1,6 +1,7 @@
 package com.huytd.basecacheredis.service.impl;
 
 import com.huytd.basecacheredis.constant.ErrorCodes;
+import com.huytd.basecacheredis.constant.TokenTypeEnum;
 import com.huytd.basecacheredis.dto.BaseResponse;
 import com.huytd.basecacheredis.dto.LoginRequest;
 import com.huytd.basecacheredis.dto.Oauth2AccessToken;
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserCacheUtils userCacheUtils;
     private final Mapper<UserProfileResponse, User> userMapper;
+
     @Override
     public BaseResponse<Long> register(RegisterRequest registerRequest) {
         BaseResponse<Long> response = new BaseResponse<>();
@@ -90,8 +92,15 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @SneakyThrows
     @Override
     public BaseResponse<Oauth2AccessToken> refreshToken(RefreshTokenRequest refreshTokenRequest) {
-        return null;
+        BaseResponse<Oauth2AccessToken> response = new BaseResponse<>();
+        if (jwtTokenUtils.getTokenType(refreshTokenRequest.getRefreshToken()).equals(TokenTypeEnum.REFRESH_TOKEN.getCode())) {
+            userRepository
+                    .findById(jwtTokenUtils.getUserIdFromToken(refreshTokenRequest.getRefreshToken()))
+                    .ifPresent(user -> response.setData(jwtTokenUtils.generateOauth2AccessToken(user)));
+        }
+        return response;
     }
 }

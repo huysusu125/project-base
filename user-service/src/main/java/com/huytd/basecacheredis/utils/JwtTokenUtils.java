@@ -1,6 +1,7 @@
 package com.huytd.basecacheredis.utils;
 
 import com.huytd.basecacheredis.constant.TokenField;
+import com.huytd.basecacheredis.constant.TokenTypeEnum;
 import com.huytd.basecacheredis.dto.Oauth2AccessToken;
 import com.huytd.basecacheredis.entity.User;
 import com.nimbusds.jose.JOSEException;
@@ -49,7 +50,7 @@ public class JwtTokenUtils {
                 .expirationTime(expirationDate)
                 .claim("user_id", user.getId())
                 .claim("email", user.getEmail())
-                .claim("token_type", "access_token")
+                .claim("token_type", TokenTypeEnum.ACCESS_TOKEN.getCode())
                 .claim("role", "")
                 .build();
 
@@ -72,6 +73,20 @@ public class JwtTokenUtils {
         return (Long) claimsSet.getClaim(TokenField.USER_ID);
     }
 
+    @SneakyThrows
+    public Integer getTokenType(String token) {
+        JWSObject jwsObject = JWSObject.parse(token);
+
+        JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
+        Date expiration = claimsSet.getExpirationTime();
+        if (expiration != null && expiration.before(new Date())) {
+            throw new JOSEException("Token is expired");
+        }
+
+        return Integer.valueOf(claimsSet.getClaim(TokenField.TOKEN_TYPE).toString());
+    }
+
+
     public String getPublicKey() {
         return Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
     }
@@ -87,14 +102,14 @@ public class JwtTokenUtils {
 
     private String generateRefreshToken(User user) throws JOSEException {
         Date now = new Date();
-        Date expirationDate = new Date(now.getTime() + tokenExpiration * 1000);
+        Date expirationDate = new Date(now.getTime() + tokenExpiration * 1000 * 2);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
                 .expirationTime(expirationDate)
                 .claim("user_id", user.getId())
                 .claim("email", user.getEmail())
-                .claim("token_type", "refresh_token")
+                .claim("token_type", TokenTypeEnum.REFRESH_TOKEN.getCode())
                 .build();
 
         return signTokenRS256(claimsSet);

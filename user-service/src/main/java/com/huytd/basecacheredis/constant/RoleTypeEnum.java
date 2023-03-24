@@ -8,7 +8,10 @@ import java.util.Objects;
 
 @AllArgsConstructor
 public enum RoleTypeEnum {
-    END_USER(0);
+    END_USER(0),
+
+
+    ;
 
     @Getter
     private Integer code;
