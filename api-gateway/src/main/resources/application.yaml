@@ -22,3 +22,8 @@ spring:
         enabled: false
         for-enabled: true
         host-append: false
+jwt:
+  time-refresh-key: 3600
+  url-fetching-key: http://localhost:8282/oauth/token_key
+routing:
+  public-apis: ${PUBLIC_API_PATTERN:\/.*\/public-api\/.*,\/actuator\/health,\/actuator\/info, \/.*\/oauth\/.*}
