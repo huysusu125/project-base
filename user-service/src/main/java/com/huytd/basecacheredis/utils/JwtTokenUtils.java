@@ -28,7 +28,7 @@ import java.util.Date;
 @Component
 public class JwtTokenUtils {
 
-    @Value("${jwt.tokenExpiration:3600}")
+    @Value("${jwt.tokenExpiration:7200}")
     private Long tokenExpiration;
 
     private KeyPair keyPair;

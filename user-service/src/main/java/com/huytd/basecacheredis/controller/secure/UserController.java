@@ -1,4 +1,4 @@
-package com.huytd.basecacheredis.controller.sucure;
+package com.huytd.basecacheredis.controller.secure;
 
 import com.huytd.basecacheredis.dto.BaseResponse;
 import com.huytd.basecacheredis.dto.UserProfileResponse;
