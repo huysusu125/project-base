@@ -4,6 +4,7 @@ import com.huytd.apigateway.properties.RoutingProperties;
 import com.huytd.apigateway.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class CustomerFilter implements WebFilter {
 
     @Override
     @NonNull
-    public Mono<Void> filter(ServerWebExchange serverWebExchange,@NonNull WebFilterChain webFilterChain) {
+    public Mono<Void> filter(ServerWebExchange serverWebExchange, @NonNull WebFilterChain webFilterChain) {
         String requestUri = serverWebExchange.getRequest().getPath().toString();
         if (isPublicEndpointAccess(requestUri)) {
             log.info("Public api: {}", requestUri);
@@ -31,11 +32,14 @@ public class CustomerFilter implements WebFilter {
         }
         HttpHeaders headers = serverWebExchange.getRequest().getHeaders();
         String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        log.info("Private api: {}", requestUri);
+        if (StringUtils.isBlank(authHeader)) {
+            return completeUnauthorizedRequest(serverWebExchange);
+        }
         return jwtService
                 .verify(authHeader)
                 .flatMap(verify -> {
                     if (verify) {
-                        log.info("Private api: {}", requestUri);
                         return webFilterChain.filter(serverWebExchange);
                     }
                     return completeUnauthorizedRequest(serverWebExchange);

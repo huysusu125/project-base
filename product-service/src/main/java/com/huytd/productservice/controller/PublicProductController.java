@@ -1,10 +1,12 @@
 package com.huytd.productservice.controller;
 
 import com.huytd.productservice.dto.BaseResponse;
+import com.huytd.productservice.dto.ProductItemResponse;
 import com.huytd.productservice.dto.ProductResponse;
 import com.huytd.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,5 +29,12 @@ public class PublicProductController {
             @RequestParam(required = false, defaultValue = "12") Integer size
     ) {
         return productService.getListProducts(search, priceFrom, priceTo, page, size);
+    }
+
+    @GetMapping("/{id}")
+    public Mono<BaseResponse<ProductItemResponse>> getDetailProduct(
+            @PathVariable(("id")) String id
+    ) {
+        return productService.getDetailProduct(id);
     }
 }
