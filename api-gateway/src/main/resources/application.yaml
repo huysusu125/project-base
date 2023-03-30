@@ -24,6 +24,6 @@ spring:
         host-append: false
 jwt:
   time-refresh-key: 3600
-  url-fetching-key: http://localhost:8282/oauth/token_key
+  url-fetching-key: http://user-service/oauth/token_key
 routing:
   public-apis: ${PUBLIC_API_PATTERN:\/.*\/public-api\/.*,\/actuator\/health,\/actuator\/info, \/.*\/oauth\/.*}

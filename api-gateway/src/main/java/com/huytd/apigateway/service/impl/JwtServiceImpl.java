@@ -30,7 +30,7 @@ public class JwtServiceImpl implements JwtService {
     private long timePublicKeyRefreshRateLimit;
     private static final String BEARER_PREFIX = "Bearer ";
     private RSAPublicKey rsaPublicKey;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
     @Value("${jwt.url-fetching-key}")
     private String urlFetchingKey;
 
@@ -75,7 +75,8 @@ public class JwtServiceImpl implements JwtService {
     }
 
     private Mono<String> fetchingKey() {
-        return webClient
+        return webClientBuilder
+                .build()
                 .get()
                 .uri(urlFetchingKey)
                 .retrieve()
