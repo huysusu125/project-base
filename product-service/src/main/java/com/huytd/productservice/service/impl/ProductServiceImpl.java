@@ -5,6 +5,8 @@ import com.huytd.productservice.document.Product;
 import com.huytd.productservice.dto.BaseResponse;
 import com.huytd.productservice.dto.CreateProductRequest;
 import com.huytd.productservice.dto.ProductItemResponse;
+import com.huytd.productservice.dto.ProductQuantityRequest;
+import com.huytd.productservice.dto.ProductQuantityResponse;
 import com.huytd.productservice.dto.ProductResponse;
 import com.huytd.productservice.dto.UpdatePriceProductRequest;
 import com.huytd.productservice.dto.UpdateQuantityProductRequest;
@@ -19,11 +21,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -118,5 +122,17 @@ public class ProductServiceImpl implements ProductService {
                     }
                     return BaseResponse.builder().build();
                 });
+    }
+
+    @Override
+    public Flux<ProductQuantityResponse> checkQuantityIsStock(ProductQuantityRequest productQuantityRequest) {
+        return productRepository
+                .findAllById(productQuantityRequest.getProductIds())
+                .map(product -> ProductQuantityResponse
+                        .builder()
+                        .price(product.getPrice())
+                        .quantity(product.getQuantityInInventory())
+                        .isStock(product.getQuantityInInventory() > 0)
+                        .build());
     }
 }

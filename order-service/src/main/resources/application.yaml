@@ -22,3 +22,6 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+
+url-internal:
+  is-stock-product: http://product-service/internal-api/product/stock

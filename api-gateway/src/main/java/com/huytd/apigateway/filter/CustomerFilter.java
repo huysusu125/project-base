@@ -26,6 +26,9 @@ public class CustomerFilter implements WebFilter {
     @NonNull
     public Mono<Void> filter(ServerWebExchange serverWebExchange, @NonNull WebFilterChain webFilterChain) {
         String requestUri = serverWebExchange.getRequest().getPath().toString();
+        if (isInternalNotAllowed(requestUri)) {
+            return completeUnauthorizedRequest(serverWebExchange);
+        }
         if (isPublicEndpointAccess(requestUri)) {
             log.info("Public api: {}", requestUri);
             return webFilterChain.filter(serverWebExchange);
@@ -62,6 +65,19 @@ public class CustomerFilter implements WebFilter {
             }
         }
         return isPermitted;
+    }
+
+    private boolean isInternalNotAllowed(String requestUri) {
+        boolean isNotAllowed = false;
+        if (!CollectionUtils.isEmpty(routingProperties.getInternalApis())) {
+            for (String healthCheckApi : routingProperties.getInternalApis()) {
+                if (requestUri.matches(healthCheckApi)) {
+                    isNotAllowed = true;
+                    break;
+                }
+            }
+        }
+        return isNotAllowed;
     }
 }
 

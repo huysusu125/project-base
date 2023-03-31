@@ -14,4 +14,6 @@ import java.util.List;
 public class RoutingProperties {
 
     private List<String> publicApis;
+
+    private List<String> internalApis;
 }

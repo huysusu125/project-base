@@ -84,7 +84,6 @@ public class JwtTokenUtils {
 //        if (!jwsObject.verify(verifier)) {
 //            throw new JOSEException("Invalid signature");
 //        }
-
         JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
         Date expiration = claimsSet.getExpirationTime();
         if (expiration != null && expiration.before(new Date())) {

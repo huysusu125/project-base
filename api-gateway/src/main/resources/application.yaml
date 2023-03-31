@@ -7,7 +7,7 @@ eureka:
     preferIpAddress: true
   client:
     serviceUrl:
-      defaultZone: ${SERVICE_REGISTRY_URL:http://localhost:8761/eureka}
+      defaultZone: ${SERVICE_REGISTRY_URL:http://172.17.0.6:8761/eureka}
 
 spring:
   application:
@@ -27,3 +27,5 @@ jwt:
   url-fetching-key: http://user-service/oauth/token_key
 routing:
   public-apis: ${PUBLIC_API_PATTERN:\/.*\/public-api\/.*,\/actuator\/health,\/actuator\/info, \/.*\/oauth\/.*}
+  internal-apis: ${INTERNAL_API_PATTERN:\/.*\/internal-api\/.*}
+

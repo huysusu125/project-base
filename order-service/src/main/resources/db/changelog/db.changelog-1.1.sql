@@ -8,14 +8,14 @@ create table if not exists "order"
     primary key,
     customer_name     varchar(255),
     user_id           bigint,
-    address           int,
+    address           varchar (255),
     payment_method    int,
     order_total_value decimal,
     status            int     default 0,
     created_at        timestamp,
     updated_at        timestamp,
     is_deleted        boolean default false
-    );
+);
 
 create table if not exists order_detail
 (
@@ -28,7 +28,7 @@ create table if not exists order_detail
     created_at timestamp,
     updated_at timestamp,
     is_deleted boolean default false
-    );
+);
 
 alter table order_detail
     add constraint order_detail_order_id_fk
