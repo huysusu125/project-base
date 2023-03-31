@@ -10,6 +10,7 @@ import com.huytd.basecacheredis.dto.RegisterRequest;
 import com.huytd.basecacheredis.dto.UserProfileResponse;
 import com.huytd.basecacheredis.entity.User;
 import com.huytd.basecacheredis.exception.BadRequestException;
+import com.huytd.basecacheredis.exception.NotFoundException;
 import com.huytd.basecacheredis.exception.UserRegistrationException;
 import com.huytd.basecacheredis.mapper.Mapper;
 import com.huytd.basecacheredis.repository.UserRepository;
@@ -61,7 +62,8 @@ public class UserServiceImpl implements UserService {
         User user = userCacheUtils.getUserFromCache(userId);
         if (user == null) {
             user = userRepository
-                    .findById(userId).orElse(null);
+                    .findById(userId)
+                    .orElseThrow(() -> new NotFoundException(Collections.singletonList(ErrorCodes.USER_NOT_FOUND)));
             if (user != null) {
                 userCacheUtils.saveUserToCache(user);
             }
@@ -74,7 +76,7 @@ public class UserServiceImpl implements UserService {
     public BaseResponse<Oauth2AccessToken> loginByEmail(LoginRequest loginRequest) {
         User user = userRepository
                 .findByUsername(loginRequest.getEmail())
-                .orElseThrow(() -> new BadRequestException(Collections.singletonList(ErrorCodes.USER_NOT_FOUND)));
+                .orElseThrow(() -> new NotFoundException(Collections.singletonList(ErrorCodes.USER_NOT_FOUND)));
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new BadRequestException(Collections.singletonList(ErrorCodes.INVALID_PASSWORD));

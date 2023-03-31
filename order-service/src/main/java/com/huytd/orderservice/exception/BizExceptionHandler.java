@@ -1,6 +1,7 @@
-package com.huytd.basecacheredis.exception;
+package com.huytd.orderservice.exception;
 
-import com.huytd.basecacheredis.constant.ErrorCodes;
+
+import com.huytd.orderservice.constant.ErrorCodes;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,16 +23,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BizExceptionHandler {
 
-    @ExceptionHandler(UserRegistrationException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorRequestResponse handlerUserRegistrationException(UserRegistrationException ex,
-                                                                 HttpServletRequest request) {
-        return buildRequestResponse(ex.getErrCodes(), request.getRequestURL().toString());
-    }
-
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ErrorRequestResponse handlerNotFoundException(NotFoundException ex,
+    public ErrorRequestResponse handlerUserRegistrationException(NotFoundException ex,
                                                                  HttpServletRequest request) {
         return buildRequestResponse(ex.getErrCodes(), request.getRequestURL().toString());
     }

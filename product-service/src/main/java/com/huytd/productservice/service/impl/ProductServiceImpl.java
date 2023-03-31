@@ -46,7 +46,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Mono<BaseResponse<ProductResponse>> getListProducts(String search, BigDecimal priceFrom, BigDecimal priceTo, Integer page, Integer size) {
         BaseResponse<ProductResponse> response = new BaseResponse<>();
-
         Criteria criteria = new Criteria();
         Collection<Criteria> criteriaCollection = new ArrayList<>();
         Query query = new Query();
@@ -56,7 +55,6 @@ public class ProductServiceImpl implements ProductService {
                     .orOperator(Criteria.where("name").regex(search.trim(), "i"),
                             Criteria.where("description").regex(search.trim(), "i")));
         }
-
         if (priceFrom != null) {
             criteriaCollection.add(Criteria.where("price").gte(priceFrom)); // gte >= gt >
         }
@@ -66,14 +64,10 @@ public class ProductServiceImpl implements ProductService {
         if (!criteriaCollection.isEmpty()) {
             criteria = criteria.andOperator(criteriaCollection);
         }
-
-
         query = query.addCriteria(criteria);
         Sort sort = Sort.by(Sort.Direction.ASC, "price").and(Sort.by(Sort.Direction.ASC, "name"))
                 .and(Sort.by(Sort.Direction.ASC, "description"));
         PageRequest pageRequest = PageRequest.of(page, size, sort);
-
-
         return reactiveMongoTemplate
                 .find(query.with(pageRequest), Product.class)
                 .map(productMapper::toDto)
