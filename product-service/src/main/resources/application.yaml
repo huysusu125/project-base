@@ -15,6 +15,6 @@ spring:
     name: product-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/product-service
+      uri: ${DB_URL:mongodb://localhost:27017/product-service}
       database: product-service
       auto-index-creation: true

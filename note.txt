@@ -1,3 +1,5 @@
+docker network create --driver bridge --subnet=172.30.0.0/16 --gateway=172.30.0.1 micro-service
+
 docker run --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=myPassword -it -p 5432:5432 postgres:alpine
 
 docker exec -it postgresql bash
@@ -10,8 +12,34 @@ docker run -d -p 27017:27017 --name mongodb mongo
 
 docker run -p 6379:6379 -d redis --name redis
 
+mvn spring-boot:build-image
+
+docker run --name registry-service --network=micro-service -p 8761:8761  ddc85942d4df
+
+docker run -p 8080:8080 --name api-gateway --network=micro-service -e SERVICE_REGISTRY_URL=http://registry-service:8761/eureka 35ed77eb683d
+
+docker run -p 8282:8282 \
+    --name user-service \
+    --network=micro-service \
+    -e SERVICE_REGISTRY_URL=http://registry-service:8761/eureka \
+    -e DB_URL="jdbc:postgresql://postgresql:5432/user-service?useSSL=false&useUnicode=true&characterEncoding=UTF-8" \
+    -e REDIS_HOST=redis \
+    6d6f8adca366
+
+docker run -d -p 8284:8284 \
+    --name order-service \
+    --network=micro-service \
+    -e SERVICE_REGISTRY_URL=http://registry-service:8761/eureka \
+    -e DB_URL="jdbc:postgresql://postgresql:5432/order-service?useSSL=false&useUnicode=true&characterEncoding=UTF-8" \
+    e6b8d5c717bd
+
+docker run -d -p 8283:8283 \
+    --name product-service \
+    --network=micro-service \
+    -e SERVICE_REGISTRY_URL=http://registry-service:8761/eureka \
+    -e DB_URL="mongodb://mongodb:27017/product-service" \
+    a362eed55ee0
 
 
-
-product service: update product quantity, update product price 
-
+// thêm container đang chạy vào docker network
+docker network connect micro-service postgresql
