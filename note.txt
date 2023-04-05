@@ -54,4 +54,7 @@ sudo service sshd restart
 sudo nano /etc/sudoers //lệnh chỉnh file
 <username> ALL=(ALL) ALL //thêm tài khoản
 
-
+//cài docker vps
+sudo apt-get update
+sudo apt upgrade
+sudo apt-get install docker.io
