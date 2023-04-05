@@ -43,3 +43,15 @@ docker run -d -p 8283:8283 \
 
 // thêm container đang chạy vào docker network
 docker network connect micro-service postgresql
+
+// cấu hình vps
+nano /etc/ssh/sshd_config // vào file cấu hình 
+PermitRootLogin
+PasswordAuthentication 
+sudo service sshd restart
+
+// thêm tài khoản có quyền truy cập root
+sudo nano /etc/sudoers //lệnh chỉnh file
+<username> ALL=(ALL) ALL //thêm tài khoản
+
+
