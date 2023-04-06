@@ -58,3 +58,12 @@ sudo nano /etc/sudoers //lệnh chỉnh file
 sudo apt-get update
 sudo apt upgrade
 sudo apt-get install docker.io
+
+// chuyển image lên vps
+local:
+docker save -o ./registry-service.tar registry-service
+scp ./registry-service.tar huysusu125@34.135.191.43:./
+vps:
+docker load -i registry-service.tar
+
+
