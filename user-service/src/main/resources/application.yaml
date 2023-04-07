@@ -6,6 +6,7 @@ eureka:
   instance:
     instance-id: ${spring.application.name}:${server.port}@${random.int}
     preferIpAddress: true
+    ip-address: ${IP_ADDRESS:10.162.0.3}
   client:
     serviceUrl:
       defaultZone: ${SERVICE_REGISTRY_URL:http://localhost:8761/eureka}
