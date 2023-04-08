@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  user-service:
+    image: user-service
+    ports:
+      - 8282:8282
+    container_name: user-service
+    environment:
+      IP_ADDRESS: 10.162.0.3
+      SERVICE_REGISTRY_URL: http://10.128.0.4:8761/eureka
+      DB_URL: "jdbc:postgresql://10.128.0.6:5432/user-service?useSSL=false&useUnicode=true&characterEncoding=UTF-8"
+      REDIS_HOST: 10.162.0.4
