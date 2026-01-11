@@ -48,6 +48,10 @@ docker network connect micro-service postgresql
 nano /etc/ssh/sshd_config // vào file cấu hình 
 PermitRootLogin
 PasswordAuthentication 
+
+sudo adduser username
+sudo usermod -aG sudo username
+
 sudo service sshd restart
 
 // thêm tài khoản có quyền truy cập root
